@@ -9,7 +9,11 @@ export function prepareSseResponse(response: Response): void {
   response.flushHeaders?.();
 }
 
-export function writeSseEvent(response: Response, event: SseEvent, data: unknown): void {
+export function writeSseEvent(
+  response: Response,
+  event: SseEvent,
+  data: unknown,
+): void {
   response.write(`event: ${event}\n`);
   response.write(`data: ${JSON.stringify(data)}\n\n`);
 }

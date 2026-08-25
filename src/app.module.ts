@@ -2,18 +2,19 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { RedisModule } from "@nestjs-modules/ioredis";
 
-import { AiModule } from "@app/ai/ai.module";
-import { AuthModule } from "@app/auth/auth.module";
-import { CacheModule } from "@app/cache/redis.module";
-import { ConversationsModule } from "@app/conversations/conversations.module";
+import { AiApiModule } from "@app/api/ai/ai-api.module";
+import { AuthModule } from "@app/api/auth/auth.module";
+import { CacheModule } from "@app/modules/cache/redis.module";
+import { ConversationsModule } from "@app/api/conversations/conversations.module";
 import {
   attachRedisErrorLogger,
   getRedisOptions,
   getRedisUrl,
 } from "@app/config/redis.config";
-import { PrismaModule } from "@app/prisma/prisma.module";
-import { QueueModule } from "@app/queue/queue.module";
-import { RefineModule } from "@app/refine/refine.module";
+import { PrismaModule } from "@app/modules/prisma/prisma.module";
+import { QueueModule } from "@app/modules/queue/queue.module";
+import { RefineModule } from "@app/api/refine/refine.module";
+import { AiContextBuilderModule } from "@app/modules/ai-context-builder/ai-context-builder.module";
 
 @Module({
   imports: [
@@ -33,9 +34,12 @@ import { RefineModule } from "@app/refine/refine.module";
     CacheModule,
     QueueModule,
     AuthModule,
-    AiModule,
+    AiApiModule,
     RefineModule,
     ConversationsModule,
+    AiContextBuilderModule,
   ],
+  providers: [],
+  controllers: [],
 })
 export class AppModule {}

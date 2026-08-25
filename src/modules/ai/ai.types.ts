@@ -1,4 +1,4 @@
 export interface AiChatRequest {
-  systemPrompt?: string;
+  system?: string;
   prompt: string;
 }

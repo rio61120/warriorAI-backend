@@ -64,7 +64,7 @@ export class ConversationsController {
     @Body() request: AskConversationDto,
     @Res() response: Response,
   ): Promise<void> {
-    await this.conversationService.createMessage(
+    const userMessage = await this.conversationService.createMessage(
       conversationId,
       MessageRole.USER,
       request.message,
@@ -72,7 +72,11 @@ export class ConversationsController {
 
     return this.sseStreamService.streamText(
       response,
-      this.conversationService.askAI(request.message),
+      this.conversationService.askAI(
+        conversationId,
+        request.message,
+        userMessage.id,
+      ),
       {
         errorMessage: "Unknown conversation AI error",
         onComplete: async (fullResponse) => {

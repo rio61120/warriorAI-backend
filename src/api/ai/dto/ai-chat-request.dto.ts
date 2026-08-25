@@ -6,7 +6,7 @@ export class AiChatRequestDto implements AiChatRequest {
   @IsOptional()
   @IsString()
   @MaxLength(4000)
-  systemPrompt?: string;
+  system?: string;
 
   @IsString()
   @MinLength(1)

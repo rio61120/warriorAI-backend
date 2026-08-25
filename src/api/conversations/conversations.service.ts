@@ -12,8 +12,8 @@ import {
 } from "@app/api/conversations/dto/conversations.dto";
 import { AiService } from "@app/modules/ai/ai.service";
 import { CacheService } from "@app/modules/cache/redis.service";
-import { buildPrompt } from "@app/modules/prompts/templates";
 import { PrismaService } from "@app/modules/prisma/prisma.service";
+import { AiContextBuilderService } from "@app/modules/ai-context-builder/ai-context-builder.service";
 
 const ALL_CONVERSATIONS_CACHE_KEY = "conversations:all";
 const CONVERSATION_CACHE_TTL_SECONDS = 300;
@@ -24,14 +24,14 @@ export class ConversationsService {
     private readonly prisma: PrismaService,
     private readonly cacheService: CacheService,
     private readonly aiService: AiService,
+    private readonly aiBuilderContext: AiContextBuilderService
   ) {}
 
   async getAllConversations(): Promise<ConversationResponseDto[]> {
     try {
-      const cachedConversations =
-        await this.cacheService.getCache<ConversationResponseDto[]>(
-          ALL_CONVERSATIONS_CACHE_KEY,
-        );
+      const cachedConversations = await this.cacheService.getCache<
+        ConversationResponseDto[]
+      >(ALL_CONVERSATIONS_CACHE_KEY);
 
       if (cachedConversations) {
         return cachedConversations;
@@ -42,19 +42,19 @@ export class ConversationsService {
       await this.cacheService.setCache(
         ALL_CONVERSATIONS_CACHE_KEY,
         conversations,
-        CONVERSATION_CACHE_TTL_SECONDS,
+        CONVERSATION_CACHE_TTL_SECONDS
       );
 
       return conversations;
     } catch (error) {
       throw new InternalServerErrorException(
-        `Failed to get all conversations: ${this.getErrorMessage(error)}`,
+        `Failed to get all conversations: ${this.getErrorMessage(error)}`
       );
     }
   }
 
   async createConversation(
-    dto: CreateConversationDto,
+    dto: CreateConversationDto
   ): Promise<ConversationResponseDto> {
     try {
       const response = await this.prisma.conversation.create({
@@ -63,14 +63,14 @@ export class ConversationsService {
       await this.cacheService.setCache(
         this.getConversationCacheKey(response.id),
         response,
-        CONVERSATION_CACHE_TTL_SECONDS,
+        CONVERSATION_CACHE_TTL_SECONDS
       );
       await this.cacheService.deleteCache(ALL_CONVERSATIONS_CACHE_KEY);
 
       return response;
     } catch (error) {
       throw new InternalServerErrorException(
-        `Failed to create conversation: ${this.getErrorMessage(error)}`,
+        `Failed to create conversation: ${this.getErrorMessage(error)}`
       );
     }
   }
@@ -93,7 +93,7 @@ export class ConversationsService {
       await this.cacheService.setCache(
         cachedConKey,
         response,
-        CONVERSATION_CACHE_TTL_SECONDS,
+        CONVERSATION_CACHE_TTL_SECONDS
       );
       return response;
     } catch (error) {
@@ -102,13 +102,13 @@ export class ConversationsService {
       }
 
       throw new InternalServerErrorException(
-        `Failed to get conversation by id: ${this.getErrorMessage(error)}`,
+        `Failed to get conversation by id: ${this.getErrorMessage(error)}`
       );
     }
   }
 
   async getMessagesByConId(
-    conversationId: string,
+    conversationId: string
   ): Promise<MessageResponseDto[]> {
     try {
       const response = await this.prisma.message.findMany({
@@ -117,7 +117,7 @@ export class ConversationsService {
 
       if (!response || response.length === 0) {
         throw new NotFoundException(
-          `No messages found for conversation id: ${conversationId}`,
+          `No messages found for conversation id: ${conversationId}`
         );
       }
 
@@ -128,7 +128,9 @@ export class ConversationsService {
       }
 
       throw new InternalServerErrorException(
-        `Failed to get messages by conversation id: ${this.getErrorMessage(error)}`,
+        `Failed to get messages by conversation id: ${this.getErrorMessage(
+          error
+        )}`
       );
     }
   }
@@ -136,7 +138,7 @@ export class ConversationsService {
   async createMessage(
     conversationId: string,
     role: MessageRole,
-    content: string,
+    content: string
   ): Promise<MessageResponseDto> {
     try {
       const response = await this.prisma.message.create({
@@ -147,20 +149,28 @@ export class ConversationsService {
         },
       });
       await this.cacheService.deleteCache(
-        this.getConversationCacheKey(conversationId),
+        this.getConversationCacheKey(conversationId)
       );
 
       return response;
     } catch (error) {
       throw new InternalServerErrorException(
-        `Failed to create message: ${this.getErrorMessage(error)}`,
+        `Failed to create message: ${this.getErrorMessage(error)}`
       );
     }
   }
 
-  async *askAI(message: string): AsyncIterableIterator<string> {
-    const prompt = buildPrompt(message);
-    yield* this.aiService.streamChat(prompt);
+  async *askAI(
+    conversationId: string,
+    message: string,
+    currentMessageId?: string
+  ): AsyncIterableIterator<string> {
+    const promptBuilt = await this.aiBuilderContext.buildUserPrompt(
+      conversationId,
+      message,
+      currentMessageId
+    );
+    yield* this.aiService.streamChat(promptBuilt);
   }
 
   private getConversationCacheKey(id: string): string {

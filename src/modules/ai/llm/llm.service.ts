@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import type { LanguageModel, ModelMessage } from "ai";
+import type { LanguageModel } from "ai";
 
 import { EnvKey } from "@app/config/env-key.enum";
 import {
@@ -8,15 +8,21 @@ import {
   DEFAULT_AI_PROVIDER,
   STREAM_TEMPERATURE,
 } from "@app/modules/ai/llm/llm.constants";
+import { z } from "zod";
 
 type AiSdkModule = typeof import("ai");
 type OpenAiSdkModule = typeof import("@ai-sdk/openai");
 type DynamicImport = <TModule>(specifier: string) => Promise<TModule>;
 
+export interface LlmPromptInput {
+  system: string;
+  prompt: string;
+}
+
 // Preserve native dynamic import after CommonJS compilation; AI SDK packages are ESM-only.
 const dynamicImport = new Function(
   "specifier",
-  "return import(specifier)",
+  "return import(specifier)"
 ) as DynamicImport;
 
 @Injectable()
@@ -34,16 +40,16 @@ export class LlmService {
     this.languageModel = this.createLanguageModel();
   }
 
-  async *stream(messages: ModelMessage[]): AsyncIterable<string> {
+  async *stream(input: LlmPromptInput): AsyncIterable<string> {
     const [{ streamText }, languageModel] = await Promise.all([
       this.aiSdk,
       this.languageModel,
     ]);
 
     const result = streamText({
-      allowSystemInMessages: true,
-      messages,
       model: languageModel,
+      system: input.system,
+      prompt: input.prompt,
       temperature: STREAM_TEMPERATURE,
     });
 
@@ -52,19 +58,38 @@ export class LlmService {
     }
   }
 
-  async generateText(messages: ModelMessage[]): Promise<string> {
+  async generateText(input: LlmPromptInput): Promise<string> {
     const [{ generateText }, languageModel] = await Promise.all([
       this.aiSdk,
       this.languageModel,
     ]);
     const { text } = await generateText({
-      allowSystemInMessages: true,
-      messages,
       model: languageModel,
+      system: input.system,
+      prompt: input.prompt,
       temperature: STREAM_TEMPERATURE,
     });
 
     return text;
+  }
+
+  async generateObject<TOutput>(
+    input: LlmPromptInput,
+    schema: z.ZodType<TOutput>
+  ): Promise<TOutput> {
+    const [{ generateText, Output }, languageModel] = await Promise.all([
+      this.aiSdk,
+      this.languageModel,
+    ]);
+    const { output } = await generateText({
+      model: languageModel,
+      output: Output.object({ schema }),
+      system: input.system,
+      prompt: input.prompt,
+      temperature: STREAM_TEMPERATURE,
+    });
+
+    return output;
   }
 
   private async createLanguageModel(): Promise<LanguageModel> {
@@ -79,8 +104,9 @@ export class LlmService {
       throw new InternalServerErrorException("AI_API_KEY is not configured");
     }
 
-    const { createOpenAI } =
-      await dynamicImport<OpenAiSdkModule>("@ai-sdk/openai");
+    const { createOpenAI } = await dynamicImport<OpenAiSdkModule>(
+      "@ai-sdk/openai"
+    );
     const provider = createOpenAI({
       apiKey,
       baseURL,

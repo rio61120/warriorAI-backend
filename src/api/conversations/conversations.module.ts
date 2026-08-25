@@ -7,8 +7,10 @@ import { AiModule } from "@app/modules/ai/ai.module";
 import { ConversationsService } from "./conversations.service";
 import { ConversationsController } from "./conversations.controller";
 
+import { AiContextBuilderModule } from "@app/modules/ai-context-builder/ai-context-builder.module";
+
 @Module({
-  imports: [CacheModule, AiModule, SseModule],
+  imports: [CacheModule, AiModule, SseModule, AiContextBuilderModule],
   providers: [ConversationsService],
   controllers: [ConversationsController],
 })

@@ -15,6 +15,7 @@ import { PrismaModule } from "@app/modules/prisma/prisma.module";
 import { QueueModule } from "@app/modules/queue/queue.module";
 import { RefineModule } from "@app/api/refine/refine.module";
 import { AiContextBuilderModule } from "@app/modules/ai-context-builder/ai-context-builder.module";
+import { TicketModule } from "@app/api/ticket/ticket.module";
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AiContextBuilderModule } from "@app/modules/ai-context-builder/ai-conte
     RefineModule,
     ConversationsModule,
     AiContextBuilderModule,
+    TicketModule,
   ],
   providers: [],
   controllers: [],

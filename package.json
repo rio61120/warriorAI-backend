@@ -19,13 +19,14 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.44",
+    "@aws-sdk/client-s3": "^3.1119.0",
     "@nestjs-modules/ioredis": "^2.2.2",
     "@nestjs/bullmq": "11.0.5",
     "@nestjs/common": "11.2.1",
     "@nestjs/config": "4.0.4",
     "@nestjs/core": "11.2.1",
     "@nestjs/jwt": "11.0.2",
-    "@nestjs/platform-express": "11.2.1",
+    "@nestjs/platform-express": "^11.2.1",
     "@prisma/client": "6.12.0",
     "ai": "^7.0.70",
     "bcryptjs": "^3.0.3",
@@ -35,13 +36,15 @@
     "ioredis": "^6.0.0",
     "prisma": "6.12.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "uuid": "^14.0.2"
   },
   "devDependencies": {
     "@nestjs/cli": "11.0.24",
     "@nestjs/schematics": "11.1.0",
     "@nestjs/testing": "11.1.6",
     "@types/express": "^5.0.0",
+    "@types/multer": "^2.2.0",
     "@types/node": "^22.10.2",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",

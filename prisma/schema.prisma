@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User Schema
 model User {
   id           String    @id @default(uuid()) @db.Uuid
   userName     String    @unique @map("user_name")
@@ -35,6 +36,7 @@ model Session {
   @@map("sessions")
 }
 
+// Message Schema
 model Conversation {
   id        String    @id @default(uuid()) @db.Uuid
   userId    String    @db.Uuid
@@ -66,4 +68,49 @@ enum MessageRole {
   SYSTEM
   USER
   ASSISTANT
+}
+
+// Document Schema
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  CHUNKING
+  EMBEDDING
+  COMPLETED
+  FAILED
+}
+
+
+model Document {
+  id          String         @id @default(uuid()) @db.Uuid
+  name        String
+  mimeType    String
+  storageKey  String
+  status      DocumentStatus @default(UPLOADED)
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  chunks      DocumentChunk[]
+
+  @@index([status])
+  @@map("documents")
+}
+
+model DocumentChunk {
+  id          String   @id @default(uuid()) @db.Uuid
+  documentId  String   @db.Uuid
+
+  content     String   @db.Text
+  chunkIndex  Int
+  pageNumber  Int?
+  tokenCount  Int?
+
+  createdAt   DateTime @default(now())
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, chunkIndex])
+  @@map("document-chunks")
 }

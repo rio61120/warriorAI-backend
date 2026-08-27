@@ -1,0 +1,395 @@
+{
+  "info": {
+    "_postman_id": "7d4b5d0b-3d29-4f09-a93c-71f8f3a7fb02",
+    "name": "warRIOrAI Backend API",
+    "description": "Postman collection for the warRIOrAI NestJS backend. Set `baseUrl`, then run Register/Login to populate `accessToken` and `userId`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "conversationId",
+      "value": ""
+    },
+    {
+      "key": "messageId",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.accessToken) pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "if (json.user && json.user.id) pm.collectionVariables.set('userId', json.user.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_name\": \"demo_user\",\n  \"password\": \"password123\",\n  \"name\": \"Demo User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Create a new user and session. Saves `accessToken` and `userId` to collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.accessToken) pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "if (json.user && json.user.id) pm.collectionVariables.set('userId', json.user.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_name\": \"demo_user\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login and save `accessToken` and `userId` to collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Returns the authenticated user. Requires Bearer token."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Revokes the current session. Requires Bearer token."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Conversations",
+      "item": [
+        {
+          "name": "Get All Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/conversations",
+              "host": ["{{baseUrl}}"],
+              "path": ["conversations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.collectionVariables.set('conversationId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"title\": \"First conversation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/conversations",
+              "host": ["{{baseUrl}}"],
+              "path": ["conversations"]
+            },
+            "description": "Creates a conversation and saves `conversationId`."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversation By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/conversations/{{conversationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["conversations", "{{conversationId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Messages By Conversation ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/conversations/{{conversationId}}/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["conversations", "{{conversationId}}", "messages"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.collectionVariables.set('messageId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"USER\",\n  \"content\": \"Hello, can you help me write a message?\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/conversations/{{conversationId}}/message",
+              "host": ["{{baseUrl}}"],
+              "path": ["conversations", "{{conversationId}}", "message"]
+            },
+            "description": "Creates a message. Valid roles: `SYSTEM`, `USER`, `ASSISTANT`."
+          },
+          "response": []
+        },
+        {
+          "name": "Ask AI In Conversation (SSE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Write a concise professional reply saying I will review this today.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/conversations/{{conversationId}}/ask",
+              "host": ["{{baseUrl}}"],
+              "path": ["conversations", "{{conversationId}}", "ask"]
+            },
+            "description": "Streams SSE events: `delta`, `done`, or `error`. Also saves USER and ASSISTANT messages in the conversation."
+          },
+          "response": []
+        }
+      ]
+    },
+
+    {
+      "name": "Refine",
+      "item": [
+        {
+          "name": "Fix Grammar (SSE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"grammar\",\n  \"message\": \"i will review it and send update soon\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/refine",
+              "host": ["{{baseUrl}}"],
+              "path": ["refine"]
+            },
+            "description": "Streams refined text through SSE."
+          },
+          "response": []
+        },
+        {
+          "name": "Translate (SSE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"translate\",\n  \"message\": \"I will review it and send an update soon.\",\n  \"targetLanguage\": \"Vietnamese\",\n  \"sourceLanguage\": \"English\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/refine",
+              "host": ["{{baseUrl}}"],
+              "path": ["refine"]
+            },
+            "description": "Streams translated text through SSE. `targetLanguage` is required for translate."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

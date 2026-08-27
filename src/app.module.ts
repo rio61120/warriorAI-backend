@@ -16,6 +16,7 @@ import { QueueModule } from "@app/modules/queue/queue.module";
 import { RefineModule } from "@app/api/refine/refine.module";
 import { AiContextBuilderModule } from "@app/modules/ai-context-builder/ai-context-builder.module";
 import { TicketModule } from "@app/api/ticket/ticket.module";
+import { DocumentsModule } from "@app/api/document/document.module";
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { TicketModule } from "@app/api/ticket/ticket.module";
     ConversationsModule,
     AiContextBuilderModule,
     TicketModule,
+    DocumentsModule,
   ],
   providers: [],
   controllers: [],

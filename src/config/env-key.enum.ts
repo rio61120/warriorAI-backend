@@ -9,5 +9,10 @@ export enum EnvKey {
   Host = "HOST",
   JwtSecret = "JWT_SECRET",
   Port = "PORT",
-  RedisUrl = "REDIS_URL"
+  R2AccountId = "R2_ACCOUNT_ID",
+  R2AccessKeyId = "R2_ACCESS_KEY_ID",
+  R2BucketName = "R2_BUCKET_NAME",
+  R2PublicUrl = "R2_PUBLIC_URL",
+  R2SecretAccessKey = "R2_SECRET_ACCESS_KEY",
+  RedisUrl = "REDIS_URL",
 }

@@ -29,6 +29,11 @@ DATABASE_URL=postgresql://warriorai:warriorai@localhost:5432/warriorai?schema=pu
 JWT_SECRET=replace-with-a-long-random-secret
 ACCESS_TOKEN_TTL_SECONDS=604800
 REDIS_URL=redis://localhost:6379
+R2_ACCOUNT_ID=your_cloudflare_account_id
+R2_ACCESS_KEY_ID=your_r2_access_key_id
+R2_SECRET_ACCESS_KEY=your_r2_secret_access_key
+R2_BUCKET_NAME=your_r2_bucket_name
+R2_PUBLIC_URL=https://your-public-r2-domain.example.com
 ```
 
 `CORS_ORIGIN` accepts comma-separated origins or full URLs. Full URLs are normalized to their origin, so `https://mail.google.com/mail/u/0/#chat/...` becomes `https://mail.google.com`.

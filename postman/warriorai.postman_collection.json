@@ -168,6 +168,38 @@
       ]
     },
     {
+      "name": "AI",
+      "item": [
+        {
+          "name": "Chat (SSE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"system\": \"You are warriorAI, a helpful AI assistant.\",\n  \"prompt\": \"Write a concise professional reply saying I will review this today.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["ai", "chat"]
+            },
+            "description": "Generic AI chat endpoint. Streams SSE events: `delta`, `done`, or `error`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Conversations",
       "item": [
         {
@@ -386,6 +418,72 @@
               "path": ["refine"]
             },
             "description": "Streams translated text through SSE. `targetLanguage` is required for translate."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Ticket",
+      "item": [
+        {
+          "name": "Classify Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Customer cannot log in after resetting password and needs urgent help before a sales call.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ticket/classify",
+              "host": ["{{baseUrl}}"],
+              "path": ["ticket", "classify"]
+            },
+            "description": "Classifies a support ticket message."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Document",
+      "item": [
+        {
+          "name": "Upload Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/document/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["document", "upload"]
+            },
+            "description": "Uploads a document file using multipart/form-data. Choose a supported file in the `file` field before sending."
           },
           "response": []
         }

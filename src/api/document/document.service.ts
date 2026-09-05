@@ -1,6 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import { ConflictException, Injectable } from "@nestjs/common";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
+import { Prisma } from "@prisma/client";
+
 import { PrismaService } from "@app/modules/prisma/prisma.service";
 import { randomUUID } from "node:crypto";
 import { DocumentExtractorService } from "@app/api/document/extractor/document.extractor.service";
@@ -12,6 +14,7 @@ import {
   DOCUMENTS_QUEUE,
   PROCESS_DOCUMENT_JOB,
 } from "@app/api/document/document.constants";
+import { CacheService } from "@app/modules/cache/redis.service";
 
 @Injectable()
 export class DocumentsService {
@@ -20,26 +23,67 @@ export class DocumentsService {
     private readonly documentsQueue: Queue,
     private readonly prisma: PrismaService,
     private readonly documentExtractor: DocumentExtractorService,
+    private readonly cacheService: CacheService,
   ) {}
 
-  async createDocument(file: UploadedDocumentFile) {
-    const storageKey = this.createStorageKey(file.originalname);
+  async createDocument(userId: string, file: UploadedDocumentFile) {
+    const documentName = file.originalname.trim();
+    const storageKey = this.createStorageKey(documentName);
     this.documentExtractor.assertCanExtract(file);
 
-    const document = await this.prisma.document.create({
-      data: {
-        mimeType: file.mimetype,
-        name: file.originalname,
-        storageKey,
+    const existingDocument = await this.prisma.document.findFirst({
+      where: {
+        userId,
+        name: documentName,
       },
+      select: { id: true },
     });
 
+    if (existingDocument) {
+      throw new ConflictException("Document already exists for this user");
+    }
+
+    const document = await this.createDocumentRecord(
+      userId,
+      file,
+      documentName,
+      storageKey,
+    );
+
     await this.processDocument(document.id, file, storageKey);
+    await this.cacheService.deleteByPrefix(`user:${userId}:document-search:`);
 
     return {
       ...document,
       queued: true,
     };
+  }
+
+  private async createDocumentRecord(
+    userId: string,
+    file: UploadedDocumentFile,
+    documentName: string,
+    storageKey: string,
+  ) {
+    try {
+      return await this.prisma.document.create({
+        data: {
+          userId,
+          mimeType: file.mimetype,
+          name: documentName,
+          storageKey,
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        throw new ConflictException("Document already exists for this user");
+      }
+
+      throw error;
+    }
   }
 
   async processDocument(

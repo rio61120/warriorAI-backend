@@ -2,6 +2,7 @@ export enum EnvKey {
   AccessTokenTtlSeconds = "ACCESS_TOKEN_TTL_SECONDS",
   AiApiKey = "AI_API_KEY",
   AiBaseUrl = "AI_BASE_URL",
+  AiEmbeddingModel = "AI_EMBEDDING_MODEL",
   AiModel = "AI_MODEL",
   AiProvider = "AI_PROVIDER",
   CorsOrigin = "CORS_ORIGIN",

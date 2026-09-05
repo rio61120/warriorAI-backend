@@ -1,9 +1,12 @@
 import {
   Controller,
   FileValidator,
+  Get,
   MaxFileSizeValidator,
   ParseFilePipe,
   Post,
+  Query,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from "@nestjs/common";
@@ -18,6 +21,8 @@ import {
   UploadedDocumentFile,
 } from "@app/api/document/document-file.types";
 import { MAX_DOCUMENT_UPLOAD_BYTES } from "@app/api/document/document.constants";
+import { AuthenticatedRequest } from "@app/api/auth/interfaces/authenticated-request.interface";
+import { VectorSearchService } from "@app/modules/vector-search/vector-search.service";
 
 class ChunkableDocumentFileValidator extends FileValidator<
   Record<string, never>,
@@ -34,7 +39,10 @@ class ChunkableDocumentFileValidator extends FileValidator<
 
 @Controller("document")
 export class DocumentController {
-  constructor(private readonly documentsService: DocumentsService) {}
+  constructor(
+    private readonly documentsService: DocumentsService,
+    private readonly vectorSearchService: VectorSearchService,
+  ) {}
 
   @Post("upload")
   @UseInterceptors(
@@ -43,6 +51,7 @@ export class DocumentController {
     }),
   )
   async uploadDocument(
+    @Req() request: AuthenticatedRequest,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -53,6 +62,21 @@ export class DocumentController {
     )
     file: UploadedDocumentFile,
   ) {
-    return this.documentsService.createDocument(file);
+    return this.documentsService.createDocument(request.user.id, file);
+  }
+
+  @Get()
+  async search(
+    @Req() request: AuthenticatedRequest,
+    @Query("q") question: string,
+    @Query("limit") limit?: string,
+    @Query("documentId") documentId?: string,
+  ) {
+    return this.vectorSearchService.searchEmbeddings(
+      request.user.id,
+      question,
+      limit ? Number(limit) : 5,
+      documentId,
+    );
   }
 }

@@ -17,6 +17,7 @@ import { RefineModule } from "@app/api/refine/refine.module";
 import { AiContextBuilderModule } from "@app/modules/ai-context-builder/ai-context-builder.module";
 import { TicketModule } from "@app/api/ticket/ticket.module";
 import { DocumentsModule } from "@app/api/document/document.module";
+import { AiModule } from "@app/modules/ai/ai.module";
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { DocumentsModule } from "@app/api/document/document.module";
     AiContextBuilderModule,
     TicketModule,
     DocumentsModule,
+    AiModule,
   ],
   providers: [],
   controllers: [],

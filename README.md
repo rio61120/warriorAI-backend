@@ -25,6 +25,7 @@ Required env:
 AI_PROVIDER=vercel
 AI_GATEWAY_API_KEY=your_vercel_ai_gateway_key
 AI_MODEL=openai/gpt-4o-mini
+AI_EMBEDDING_MODEL=openai/text-embedding-3-small
 DATABASE_URL=postgresql://warriorai:warriorai@localhost:5432/warriorai?schema=public
 JWT_SECRET=replace-with-a-long-random-secret
 ACCESS_TOKEN_TTL_SECONDS=604800

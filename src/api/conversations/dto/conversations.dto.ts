@@ -1,17 +1,7 @@
 import { MessageRole } from "@prisma/client";
-import {
-  IsEnum,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MaxLength,
-  MinLength,
-} from "class-validator";
+import { IsEnum, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 export class CreateConversationDto {
-  @IsUUID()
-  userId: string;
-
   @IsOptional()
   @IsString()
   title?: string;

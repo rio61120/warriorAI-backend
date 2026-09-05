@@ -10,6 +10,7 @@ import {
   DOCUMENT_CHUNK_SIZE,
   DOCUMENTS_QUEUE,
 } from "@app/api/document/document.constants";
+import { VectorSearchService } from "@app/modules/vector-search/vector-search.service";
 
 @Processor(DOCUMENTS_QUEUE)
 export class DocumentProcessor extends WorkerHost {
@@ -17,6 +18,7 @@ export class DocumentProcessor extends WorkerHost {
     private readonly documentExtractor: DocumentExtractorService,
     private readonly prisma: PrismaService,
     private readonly r2StorageService: R2StorageService,
+    private readonly vectorSearchService: VectorSearchService,
   ) {
     super();
   }
@@ -64,6 +66,21 @@ export class DocumentProcessor extends WorkerHost {
       }
 
       await this.prisma.document.update({
+        data: { status: DocumentStatus.EMBEDDING },
+        where: { id: job.data.documentId },
+      });
+
+      await Promise.all(
+        chunks.map((content, index) =>
+          this.vectorSearchService.saveEmbedding(
+            job.data.documentId,
+            index,
+            content,
+          ),
+        ),
+      );
+
+      await this.prisma.document.update({
         data: { status: DocumentStatus.COMPLETED },
         where: { id: job.data.documentId },
       });
@@ -86,7 +103,11 @@ export class DocumentProcessor extends WorkerHost {
 
     const chunks: string[] = [];
 
-    for (let index = 0; index < normalizedText.length; index += DOCUMENT_CHUNK_SIZE) {
+    for (
+      let index = 0;
+      index < normalizedText.length;
+      index += DOCUMENT_CHUNK_SIZE
+    ) {
       chunks.push(normalizedText.slice(index, index + DOCUMENT_CHUNK_SIZE));
     }
 

@@ -21,17 +21,19 @@ interface BuildRefinePromptInput {
 export class AiContextBuilderService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly ai: AiService
+    private readonly ai: AiService,
   ) {}
 
   async buildUserPrompt(
+    userId: string,
     conversationId: string,
     message: string,
-    excludeMessageId?: string
+    excludeMessageId?: string,
   ): Promise<AiChatRequest> {
     const recentMessages = await this.prisma.message.findMany({
       where: {
         conversationId,
+        conversation: { userId },
         ...(excludeMessageId ? { id: { not: excludeMessageId } } : {}),
       },
       orderBy: {
@@ -50,9 +52,7 @@ export class AiContextBuilderService {
     const conversationText = chronologicalMessages
       .map((message) => `${message.role}: ${message.content}`)
       .join("\n");
-    const summary = await this.ai.summarizeConversation(
-      conversationText
-    );
+    const summary = await this.ai.summarizeConversation(conversationText);
 
     return {
       prompt: [

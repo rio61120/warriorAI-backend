@@ -60,6 +60,24 @@ export class CacheService {
     }
   }
 
+  async deleteByPrefix(prefix: string): Promise<void> {
+    try {
+      const stream = this.redis.scanStream({
+        match: `${this.normalizeKey(prefix)}*`,
+      });
+
+      for await (const keys of stream) {
+        if (Array.isArray(keys) && keys.length > 0) {
+          await this.redis.del(...keys);
+        }
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to delete cache prefix "${prefix}": ${this.getErrorMessage(error)}`,
+      );
+    }
+  }
+
   private normalizeKey(key: string): string {
     return key.startsWith(`${CACHE_KEY_PREFIX}:`)
       ? key

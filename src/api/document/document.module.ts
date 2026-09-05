@@ -6,6 +6,7 @@ import { DocumentProcessor } from "@app/api/document/processing/document.process
 import { DocumentExtractorService } from "@app/api/document/extractor/document.extractor.service";
 import { R2StorageModule } from "@app/modules/storage/r2-storage.module";
 import { DOCUMENTS_QUEUE } from "@app/api/document/document.constants";
+import { VectorSearchModule } from "@app/modules/vector-search/vector-search.module";
 
 @Module({
   imports: [
@@ -13,8 +14,13 @@ import { DOCUMENTS_QUEUE } from "@app/api/document/document.constants";
     BullModule.registerQueue({
       name: DOCUMENTS_QUEUE,
     }),
+    VectorSearchModule,
   ],
-  providers: [DocumentsService, DocumentProcessor, DocumentExtractorService],
+  providers: [
+    DocumentsService,
+    DocumentProcessor,
+    DocumentExtractorService,
+  ],
   controllers: [DocumentController],
 })
 export class DocumentsModule {}
